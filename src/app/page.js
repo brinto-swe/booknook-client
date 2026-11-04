@@ -1,5 +1,6 @@
 import Navbar from "@/components/home/Navbar";
 import { Suspense } from "react";
+import Link from "next/link";
 import HeroSlider from "@/components/home/HeroSlider";
 import NewArrivals from "@/components/home/NewArrivals";
 import BorrowingSteps from "@/components/home/BorrowingSteps";
@@ -13,7 +14,7 @@ export default function Home() {
       <a href="#main-content" className="skip-link">Skip to content</a>
       <Navbar />
       <main id="main-content" className="page-width home-main">
-        <Suspense fallback={<section className="hero" aria-label="Discover BookNook"><div className="hero-slide"><div className="hero-copy"><h1>Discover Your<br />Next Great <span>Read</span></h1><p>Explore thousands of books, borrow your favorites, and enjoy the journey of reading.</p><a className="button button-pill" href="/books">Browse Books →</a></div></div></section>}><HeroSlider /></Suspense>
+        <Suspense fallback={<section className="hero" aria-label="Discover BookNook"><div className="hero-slide"><div className="hero-copy"><h1>Discover Your<br />Next Great <span>Read</span></h1><p>Explore thousands of books, borrow your favorites, and enjoy the journey of reading.</p><Link className="button button-pill" href="/books">Browse Books →</Link></div></div></section>}><HeroSlider /></Suspense>
         <NewArrivals />
         <BorrowingSteps />
         <Categories />

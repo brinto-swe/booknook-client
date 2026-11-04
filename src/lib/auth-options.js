@@ -1,12 +1,12 @@
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { jwt } from "better-auth/plugins";
+import { meetsPasswordPolicy, PASSWORD_MESSAGE } from "./password-policy.js";
 
 export function validatePassword(password) {
-  if (typeof password !== "string" || password.length < 6
-    || !/[A-Z]/.test(password) || !/[a-z]/.test(password)) {
+  if (!meetsPasswordPolicy(password)) {
     throw new APIError("BAD_REQUEST", {
       code: "INVALID_PASSWORD",
-      message: "Password must contain at least 6 characters, one uppercase letter, and one lowercase letter.",
+      message: PASSWORD_MESSAGE,
     });
   }
 }

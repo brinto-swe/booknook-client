@@ -14,7 +14,11 @@ The installed shadcn Sheet, Button, Card, Badge, Skeleton, and Sonner components
 
 ## API and preview behavior
 
-Set the public `NEXT_PUBLIC_API_URL` to the Express origin for deployment. Its local default is `http://localhost:5000`. The browser requests `GET /books?limit=6`; the existing backend supplies newest-first ordering. The client consumes `{ success: true, data: { books: [...] } }`, validates the expected display fields, and displays at most six records. No database writes or seeds occur.
+Set the public `NEXT_PUBLIC_API_URL` to the Express origin for deployment. Its local default is `http://localhost:5000`. The browser requests `GET /books?page=1&limit=6` without caching; the existing backend supplies newest-first ordering. The client consumes `{ success: true, data: { books: [...] } }`, validates ID/title, maps missing author/category/image metadata to safe card fallbacks, and displays at most six records. No database writes or seeds occur.
+
+Local development requires both applications running in separate terminals: `npm run dev` inside `booknook-server`, and `npm run dev` inside `booknook-client`. Starting Next.js alone does not start Express. After restarting Express, use the existing Retry button or refresh the homepage. A healthy but empty catalog shows the empty-library notice and preview books, rather than the API-error notice.
+
+The integration diagnostic found no listener on port 5000. Starting the existing Express entry point restored HTTP 200, matching CORS headers, and the expected `data.books` envelope. No backend contract or CORS change was needed. `node --test test/books-api.test.js` checks the frontend API contract, optional-field fallbacks, failure handling, cancellation, and repeated requests without loading environment files.
 
 Loading shows six skeleton cards. A valid empty response shows the six local preview records with a visible preview notice. An unavailable/malformed response or eight-second timeout shows a separate error notice, the preview books, and a Retry action. Preview detail buttons show a toast instead of navigating with fake IDs. Valid API records link to `/books/:id`; that frontend page and its backend authentication remain future work. Missing cover images fall back to an accessible book/title graphic.
 

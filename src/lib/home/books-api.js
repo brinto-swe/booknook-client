@@ -1,19 +1,54 @@
 export function getBooksUrl() {
   const origin = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const url = new URL("/books", origin);
+  let url;
+  try {
+    url = new URL("/books", origin);
+  } catch {
+    // URL parsing errors can include configuration values; use a fixed message.
+    throw new Error("Invalid public API URL.");
+  }
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error("Invalid public API URL.");
+  url.searchParams.set("page", "1");
   url.searchParams.set("limit", "6");
   return url.toString();
 }
 
 export async function fetchLatestBooks(signal) {
-  const response = await fetch(getBooksUrl(), { signal, headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error("The library is temporarily unavailable.");
-  const result = await response.json();
-  if (result.success !== true || !Array.isArray(result.data?.books)) throw new Error("Invalid catalog response.");
-  const books = result.data.books.slice(0, 6);
-  if (books.some(book => !book || typeof book._id !== "string" || !/^[a-f\d]{24}$/i.test(book._id)
-    || typeof book.title !== "string" || typeof book.author !== "string" || typeof book.category !== "string"
-    || typeof book.imageUrl !== "string")) throw new Error("Invalid catalog response.");
-  return books;
+  const response = await fetch(getBooksUrl(), {
+    signal,
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) {
+    const error = new Error("The library is temporarily unavailable.");
+    error.status = response.status;
+    throw error;
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("Invalid catalog JSON response.");
+  }
+  if (result?.success !== true || !Array.isArray(result.data?.books)) {
+    throw new Error("Invalid catalog response.");
+  }
+
+  return result.data.books.slice(0, 6).map(book => {
+    if (!book || typeof book._id !== "string" || !/^[a-f\d]{24}$/i.test(book._id)
+      || typeof book.title !== "string" || !book.title.trim()) {
+      throw new Error("Invalid catalog response.");
+    }
+    // Only ID/title are needed to identify a card. Missing display metadata
+    // should use card fallbacks rather than turning a successful read into an error.
+    const text = (value, fallback) => typeof value === "string" && value.trim() ? value.trim() : fallback;
+    return {
+      _id: book._id,
+      title: book.title.trim(),
+      author: text(book.author, "Unknown author"),
+      category: text(book.category, "Others"),
+      imageUrl: text(book.imageUrl, ""),
+    };
+  });
 }

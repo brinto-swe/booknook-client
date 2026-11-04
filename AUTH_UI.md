@@ -9,10 +9,10 @@ This phase uses the existing Better Auth 1.7.15 instance, MongoDB adapter, JWT p
 | `/login` | Public | React Hook Form/Zod email/password login, supported remember-me option, password visibility, Google button, loading/error states, and Sonner feedback. |
 | `/register` | Public | Name, email, password, matching confirmation, server-aligned password policy, and Better Auth sign-up. |
 | `/profile` | Private | Read-only name, email, image/initials, member-since date, and account information from a verified session. |
-| `/add-book` | Private | Authenticated placeholder; no book mutation. |
-| `/my-books` | Private | Authenticated placeholder; no management operations. |
+| `/add-book` | Private | Book creation form; see BOOK_MANAGEMENT_UI.md. |
+| `/my-books` | Private | Owner collection with edit/delete; see BOOK_MANAGEMENT_UI.md. |
 | `/my-borrows` | Private | Authenticated placeholder; no borrow operations. |
-| `/books/[id]` | Private | Authenticated placeholder; no details API call or borrowing. |
+| `/books/[id]` | Private | Authenticated Book API details; borrowing remains deferred. |
 | `/books` | Public | Catalog landing placeholder linking to the existing homepage arrivals; full catalog functionality is deferred. |
 
 The homepage layout, assets, colors, card grids, and sections are unchanged. Its prerender fallback CTA now uses Next Link instead of a plain anchor because the newly created `/books` page activates the corresponding lint rule.
@@ -41,7 +41,7 @@ Mobile links follow the same state. Active navigation follows the current path. 
 
 ## Server protection and callbacks
 
-Every private page invokes `requireSession()` through a server component. The `(member)` layout supplies presentation only; it does not serve as the sole authorization check. A missing cookie redirects immediately; a present cookie is verified using Better Auth's server API with cookie-cache bypass and the shared MongoDB connection. Forged, invalid, expired, or logged-out sessions cannot grant access. Database failures fail closed into the member error boundary.
+Every private page invokes `requireSession()` through a server component. The `(member)` and `(book-management)` layouts supply presentation only; it does not serve as the sole authorization check. A missing cookie redirects immediately; a present cookie is verified using Better Auth's server API with cookie-cache bypass and the shared MongoDB connection. Forged, invalid, expired, or logged-out sessions cannot grant access. Database failures fail closed into the member error boundary.
 
 The group loading boundary streams a neutral loading state while Next reads request headers and verifies the session. Personalized profile data is not put into a shared cache. A full request/refresh to a private route checks authentication again. This follows the [Better Auth Next.js server API integration](https://better-auth.com/docs/integrations/next); no cookie-only proxy is used as a security boundary.
 
@@ -52,7 +52,7 @@ Frontend route protection does not authorize Express operations. The existing re
 ## Files added
 
 - `src/app/login/page.js`, `src/app/register/page.js`, and `src/app/books/page.js`.
-- `src/app/(member)/layout.js`, `loading.js`, `error.jsx`, and pages for add-book, my-books, my-borrows, profile, and books/[id].
+- `src/app/(member)/layout.js`, `loading.js`, `error.jsx`, and pages for my-borrows and profile. Book pages now live under `(book-management)`; see BOOK_MANAGEMENT_UI.md.
 - `src/components/auth/AuthForm.jsx`, `AuthPage.jsx`, `PageShell.jsx`, `UserAvatar.jsx`, and `ProtectedPlaceholder.jsx`.
 - `src/lib/auth-ui/schemas.js`, `redirects.js`, `actions.js`, `navigation.js`, and `session-guard.js`.
 - `src/lib/password-policy.js` and `src/lib/session.js`.

@@ -1,0 +1,8 @@
+import { requireSession } from "@/lib/session";
+import { destinationWithQuery } from "@/lib/auth-ui/redirects";
+import AddBook from "@/components/books/AddBook";
+export const metadata = { title: "Add a Book" };
+export default async function AddBookPage({ searchParams }) {
+  const { user } = await requireSession(destinationWithQuery("/add-book", await searchParams));
+  return <AddBook user={{ name: user.name, email: user.email }} />;
+}

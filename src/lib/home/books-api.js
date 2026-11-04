@@ -1,13 +1,7 @@
+import { getApiUrl } from "../api/url.js";
+
 export function getBooksUrl() {
-  const origin = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  let url;
-  try {
-    url = new URL("/books", origin);
-  } catch {
-    // URL parsing errors can include configuration values; use a fixed message.
-    throw new Error("Invalid public API URL.");
-  }
-  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error("Invalid public API URL.");
+  const url = new URL(getApiUrl("/books"));
   url.searchParams.set("page", "1");
   url.searchParams.set("limit", "6");
   return url.toString();

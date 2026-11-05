@@ -3,6 +3,6 @@ export function getApiUrl(path) {
   let url;
   try { url = new URL(path, origin); } catch { throw new Error("Invalid public API URL."); }
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password
-    || url.origin !== new URL(origin).origin || !path.startsWith("/books")) throw new Error("Invalid public API URL.");
+    || url.origin !== new URL(origin).origin || !/^\/(?:books|borrows)(?:[/?]|$)/.test(path)) throw new Error("Invalid public API URL.");
   return url.toString();
 }

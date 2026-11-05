@@ -6,7 +6,7 @@ const messages = {
   429: "Too many requests. Please try again shortly.",
 };
 export class BookApiError extends Error {
-  constructor(status = 0) { super(messages[status] || "The library is unavailable. Please try again."); this.name = "BookApiError"; this.status = status; }
+  constructor(status = 0, code) { super(messages[status] || "The library is unavailable. Please try again."); this.name = "BookApiError"; this.status = status; this.code = code; }
 }
 // A fresh JWT is requested for each operation. No token storage or mutation retries.
 export function createAuthenticatedRequest(getToken, fetcher = (...args) => fetch(...args)) {
@@ -23,7 +23,15 @@ export function createAuthenticatedRequest(getToken, fetcher = (...args) => fetc
           ...(body === undefined ? {} : { "Content-Type": "application/json" }) },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
-      if (!response.ok) throw new BookApiError(response.status);
+      if (!response.ok) {
+        let code;
+        try {
+          const payload = await response.json();
+          const allowed = ["DUPLICATE_BORROW", "BOOK_UNAVAILABLE", "BORROW_ALREADY_RETURNED", "BORROW_NOT_FOUND", "BOOK_NOT_FOUND", "INVENTORY_CONFLICT"];
+          if (allowed.includes(payload?.error?.code)) code = payload.error.code;
+        } catch { /* Preserve HTTP status when an error body is not JSON. */ }
+        throw new BookApiError(response.status, code);
+      }
       let json;
       try { json = await response.json(); } catch { throw new BookApiError(502); }
       if (json?.success !== true || !json.data || typeof json.data !== "object") throw new BookApiError(502);

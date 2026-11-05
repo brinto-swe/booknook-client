@@ -77,3 +77,30 @@ The client suite includes form validation/confirmation, safe callback cases, pen
 Browser checks cover form errors, password visibility, preserved callbacks, anonymous redirects for every private page, query-string preservation, desktop/mobile layouts, authenticated dropdown navigation, and logout. Authenticated UI and successful login browser checks use temporary intercepted responses; they do not bypass server guards or create database records. Real anonymous route protection is exercised against the local Next.js server. All temporary request interception is cleared afterward. Google OAuth remains unverified.
 
 Final results: **31 client tests passed, 33 server tests passed, client ESLint passed, and production build passed**. The live existing Express health and Books listing endpoints also returned HTTP 200. Login/Register had no horizontal overflow at 320px; the reviewed desktop login uses the same BookNook styling. A fresh local-server check reported no new browser render errors. Direct Node tests retain the existing module-detection warning because the client package does not declare an ESM type; no package configuration changes were needed.
+
+
+## Private route rendering and Cache Components (Next.js 16.4.4)
+
+The private pages `/add-book`, `/my-books`, `/my-borrows`, `/books/[id]` and `/profile` explicitly export `instant = false`. This is a page-level declaration that fresh server authentication may block that navigation. Cache Components, Partial Prefetching, the shared layouts, existing loading UI and Next Link navigation remain enabled.
+
+The reproduced development diagnostic came from `requireSession` → Better Auth `getSession` → better-call `getSignedCookie` → Web Crypto `verifySignature`. Next's implicit instant-navigation validation saw that uncached async verification in the page's navigation body. A route-group loading boundary is not sufficient for every shared-layout navigation into that page. The installed `next/dist/docs/01-app/02-guides/authentication-with-cache-components.md` and `.../03-api-reference/03-file-conventions/02-route-segment-config/instant.md` document this narrow opt-out for session-dependent routes.
+
+No session cache was added. `headers()` remains request-scoped, signed cookies and the database session are still verified, `disableCookieCache: true` is preserved, and anonymous users still redirect before private content renders. Express JWT/ownership/inventory enforcement is unchanged. Public pages and the root layout do not opt out. This intentionally preserves the cost of a fresh server session check rather than promising an instant authenticated page.
+
+### Real-browser regression
+
+With local Next.js at port 3000 and Express at port 5000, run from the client directory:
+
+```powershell
+node scripts/check-private-routes-real.mjs --allow-test-records
+```
+
+Requires an installed Chromium browser (defaults to Chrome on Windows; `BOOKNOOK_BROWSER_BIN` overrides its executable) and a free local debugging port 9344. `BOOKNOOK_QA_OUTPUT` optionally selects the sanitized evidence directory; otherwise a unique system temporary directory is used. No dependencies are installed. The runner is separate from `node --test` because it uses the real local application and Atlas.
+
+The explicit flag permits dedicated QA account/book/loan creation through the actual forms/APIs. It uses generated credentials only in memory, never substitutes API responses, never disables guards and never changes application source while running. It tests anonymous redirects for all five private pages, real registration/login/logout, refresh/session identity, persistent Navbar and private Link navigation, owner Book create/read/update/delete, Borrow/Return, retained history, duplicate/repeated-operation rejection and absence of browser errors. Only the exact owned QA book is cleaned up, returning its exact QA loan first if necessary. Returned history and QA accounts are retained; sessions are signed out. Do not run this against production or concurrently with another runner using that debugging port.
+
+`--baseline` is a diagnostic mode for reproducing the pre-fix issue: it creates an account and exercises navigation without creating a book, and expects the original diagnostic to be present. It is not the passing regression command after this fix. `--allow-test-records` is still required.
+
+Verification: before the application change, a real browser captured the signed-cookie verification stack and the same diagnostic on `/profile` as well as the originally reported private routes. After the change, the final real-browser run passed **13 checks, 0 failed, 0 not tested**, with **0 uncached-data diagnostics and 0 browser console errors**. Real Book CRUD and Borrow/Return used the actual Express APIs and Atlas; no response mocks. Google OAuth was not exercised.
+
+The first baseline runner hit a DOM-reference serialization error while checking Navbar identity. The first post-fix attempt also needed a modal-scoped edit selector. Those runner issues were corrected; the complete final 13-check run passed. Earlier evidence was retained separately. Test-created books were removed safely after returning their QA loans; returned history and the three dedicated accounts from baseline/verification attempts remain.

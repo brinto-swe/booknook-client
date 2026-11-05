@@ -2,6 +2,8 @@ import { requireSession } from "@/lib/session";
 import UserAvatar from "@/components/auth/UserAvatar";
 import { destinationWithQuery } from "@/lib/auth-ui/redirects";
 
+// Fresh server session verification may block this page's navigation.
+export const instant = false;
 export const metadata = { title: "My Profile" };
 export default async function ProfilePage({ searchParams }) {
   const { user } = await requireSession(destinationWithQuery("/profile", await searchParams));

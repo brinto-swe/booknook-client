@@ -1,6 +1,6 @@
 .book-theme, .book-dialog { --bm-surface:#fff; --bm-input:#f8faff; --bm-soft:#eef2ff; --bm-border:#dde4f6; --bm-muted:#64708d; --bm-danger:#ad332e; --bm-danger-bg:#fff0ee; --bm-danger-border:#f3cdc8; }
 .dark .book-theme, .dark .book-dialog { --bm-surface:#1d2943; --bm-input:#172139; --bm-soft:#263451; --bm-border:#36476b; --bm-muted:#b3bdd6; --bm-danger:#ffb3a8; --bm-danger-bg:#482d39; --bm-danger-border:#684453; }
-.book-theme { display:flex; flex-direction:column; min-height:100svh; background:var(--book-paper); color:var(--book-navy); font-size:14px; }
+.book-theme { display:flex; flex-direction:column; min-height:0; flex:1; background:var(--book-paper); color:var(--book-navy); font-size:14px; }
 .book-theme .account-main { padding:48px 24px 80px; }
 .book-page { width:100%; max-width:1000px; margin:0 auto; }
 .book-add { max-width:720px; }

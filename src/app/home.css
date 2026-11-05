@@ -64,7 +64,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #8298ff; outline-offs
 .section-subtitle { margin: 6px 0 0; font-size: 16px; line-height: 1.45; }
 .see-all { min-height: 39px; color: var(--book-blue); border-color: #5267e3; font-size: 14px; padding-inline: 20px; }
 .catalog-notice { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: #5a6486; font-size: 12px; line-height: 1.4; margin: 0 0 10px; min-height: 22px; }
-.books-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.books-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
 .book-card { display: flex; flex-direction: column; align-items: center; min-width: 0; margin: 0; padding: 12px 13px 14px; gap: 0; color: var(--book-navy); background: #fff; border: 1px solid #e6ebff; border-radius: 11px; box-shadow: 0 4px 10px #283b8710; ring: none; --tw-ring-shadow: 0 0 #0000; }
 .book-cover { position: relative; width: 100%; height: clamp(145px, 14vw, 205px); flex-shrink: 0; margin-bottom: 12px; }
 .book-cover img { object-fit: contain; filter: drop-shadow(2px 4px 5px #00000027); border-radius: 4px; }

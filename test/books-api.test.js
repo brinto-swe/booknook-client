@@ -9,7 +9,7 @@ const record = (index = 1) => ({
   category: "Fiction",
   imageUrl: "https://example.com/cover.jpg",
 });
-const response = books => Response.json({ success: true, data: { books, pagination: { page: 1, limit: 6 } } });
+const response = books => Response.json({ success: true, data: { books, pagination: { page: 1, limit: 30, total: books.length, totalPages: Math.ceil(books.length / 30) } } });
 
 test("homepage Books API contract", async (t) => {
   const previousOrigin = process.env.NEXT_PUBLIC_API_URL;
@@ -19,24 +19,24 @@ test("homepage Books API contract", async (t) => {
     else process.env.NEXT_PUBLIC_API_URL = previousOrigin;
   });
 
-  await t.test("uses the Express endpoint and existing first-page/latest-six parameters", () => {
-    assert.equal(getBooksUrl(), "http://localhost:5000/books?page=1&limit=6");
+  await t.test("uses the Express endpoint and existing first-page/latest-30 parameters", () => {
+    assert.equal(getBooksUrl(), "http://localhost:5000/books?page=1&limit=30");
     process.env.NEXT_PUBLIC_API_URL = "https://catalog.example.com/";
-    assert.equal(getBooksUrl(), "https://catalog.example.com/books?page=1&limit=6");
+    assert.equal(getBooksUrl(), "https://catalog.example.com/books?page=1&limit=30");
     delete process.env.NEXT_PUBLIC_API_URL;
   });
 
-  await t.test("maps the backend envelope and caps display at six records", async () => {
+  await t.test("maps the backend envelope and caps display at 30 records", async () => {
     const controller = new AbortController();
     const mock = t.mock.method(globalThis, "fetch", async (url, options) => {
-      assert.equal(url, "http://localhost:5000/books?page=1&limit=6");
+      assert.equal(url, "http://localhost:5000/books?page=1&limit=30");
       assert.equal(options.signal, controller.signal);
       assert.equal(options.cache, "no-store");
       assert.equal(options.headers.Accept, "application/json");
-      return response(Array.from({ length: 8 }, (_, i) => record(i + 1)));
+      return response(Array.from({ length: 32 }, (_, i) => record(i + 1)));
     });
     const books = await fetchLatestBooks(controller.signal);
-    assert.equal(books.length, 6);
+    assert.equal(books.length, 30);
     assert.deepEqual(books[0], record());
     mock.mock.restore();
   });

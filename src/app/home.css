@@ -21,7 +21,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #8298ff; outline-offs
 .button-outline { color: var(--book-navy); background: transparent; border-color: #828cae; }
 .button-outline:hover { color: var(--book-blue); background: #eef1ff; }
 .button-pill { border-radius: 99px; }
-.site-header { min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.site-header { position: sticky; top: 0; z-index: 40; background: var(--book-paper); min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 16px; color: var(--book-navy); font-size: 30px; line-height: 1; font-weight: 750; letter-spacing: -1.2px; flex-shrink: 0; }
 .brand-mark { position: relative; display: grid; place-items: center; color: #3c53d2; }
 .brand-mark::before { content: ""; position: absolute; inset: 3px 7px 7px; border-radius: 7px 7px 2px 2px; background: #aab8ff; }
